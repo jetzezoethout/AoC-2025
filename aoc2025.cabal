@@ -28,3 +28,10 @@ library utils
                     , ProcessFile
                     , LocatedChar
     hs-source-dirs:   utils
+
+executable day01
+    import:           common
+    main-is:          Main.hs
+    other-modules:    Dial
+    build-depends:    utils
+    hs-source-dirs:   day01
