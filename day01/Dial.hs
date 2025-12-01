@@ -1,41 +1,34 @@
 module Dial where
 
-import           Data.Text (Text)
-import qualified Data.Text as T
-import           Parsers   (parseInt)
+import           DialRotation (DialDirection (..), DialRotation (..))
 
-type Dial = Int
-
-data DialDirection
-  = DialLeft
-  | DialRight
-  deriving (Show)
-
-parseDialDirection :: Char -> DialDirection
-parseDialDirection 'L' = DialLeft
-parseDialDirection 'R' = DialRight
-parseDialDirection _   = error "Unknown direction"
-
-data DialRotation = DialRotation
-  { direction :: DialDirection
-  , clicks    :: Int
+data Dial = Dial
+  { position     :: Int
+  , zeroesPassed :: Int
   } deriving (Show)
 
-parseDialRotation :: Text -> DialRotation
-parseDialRotation text =
-  DialRotation
-    { direction = parseDialDirection $ T.head text
-    , clicks = parseInt $ T.tail text
-    }
+initialDial :: Dial
+initialDial = Dial {position = 50, zeroesPassed = 0}
+
+isAtZero :: Dial -> Bool
+isAtZero Dial {..} = position == 0
 
 rotate :: Dial -> DialRotation -> Dial
-rotate current DialRotation {..} =
-  case direction of
-    DialLeft  -> (current - clicks) `mod` 100
-    DialRight -> (current + clicks) `mod` 100
+rotate Dial {..} DialRotation {..} =
+  let clicksBackToZero =
+        case direction of
+          DialLeft  -> (100 - position) `mod` 100
+          DialRight -> position `mod` 100
+      additionalPasses = (clicks + clicksBackToZero) `div` 100
+      newPosition =
+        case direction of
+          DialLeft  -> (position - clicks) `mod` 100
+          DialRight -> (position + clicks) `mod` 100
+   in Dial
+        {position = newPosition, zeroesPassed = zeroesPassed + additionalPasses}
 
 doRotations :: [DialRotation] -> [Dial]
-doRotations = doRotationsFrom 50
+doRotations = doRotationsFrom initialDial
   where
     doRotationsFrom :: Dial -> [DialRotation] -> [Dial]
     doRotationsFrom current [] = [current]

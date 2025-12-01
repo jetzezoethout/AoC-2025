@@ -33,5 +33,6 @@ executable day01
     import:           common
     main-is:          Main.hs
     other-modules:    Dial
+                    , DialRotation
     build-depends:    utils
     hs-source-dirs:   day01
