@@ -20,8 +20,4 @@ data DialRotation = DialRotation
   } deriving (Show)
 
 parseDialRotation :: Text -> DialRotation
-parseDialRotation text =
-  DialRotation
-    { direction = parseDialDirection $ T.head text
-    , clicks = parseInt $ T.tail text
-    }
+parseDialRotation text = DialRotation {direction = parseDialDirection $ T.head text, clicks = parseInt $ T.tail text}

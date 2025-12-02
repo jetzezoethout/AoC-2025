@@ -24,13 +24,11 @@ rotate Dial {..} DialRotation {..} =
         case direction of
           DialLeft  -> (position - clicks) `mod` 100
           DialRight -> (position + clicks) `mod` 100
-   in Dial
-        {position = newPosition, zeroesPassed = zeroesPassed + additionalPasses}
+   in Dial {position = newPosition, zeroesPassed = zeroesPassed + additionalPasses}
 
 doRotations :: [DialRotation] -> [Dial]
 doRotations = doRotationsFrom initialDial
   where
     doRotationsFrom :: Dial -> [DialRotation] -> [Dial]
     doRotationsFrom current [] = [current]
-    doRotationsFrom current (next:rest) =
-      current : doRotationsFrom (rotate current next) rest
+    doRotationsFrom current (next:rest) = current : doRotationsFrom (rotate current next) rest
