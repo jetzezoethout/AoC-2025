@@ -6,13 +6,20 @@ import           Parsers   (parseInt)
 
 type ProductId = Int
 
-isInvalid :: ProductId -> Bool
-isInvalid productId =
-  even idLength && take halfLength idString == drop halfLength idString
+isSilly :: ProductId -> Bool
+isSilly = (`isRepeating` 2)
+
+isExtendedSilly :: ProductId -> Bool
+isExtendedSilly productId = any (productId `isRepeating`) [2 .. idLength]
+  where
+    idLength = length $ show productId
+
+isRepeating :: ProductId -> Int -> Bool
+productId `isRepeating` times =
+  concat (replicate times $ take (idLength `div` times) idString) == idString
   where
     idString = show productId
     idLength = length idString
-    halfLength = idLength `div` 2
 
 data IdRange = IdRange
   { start :: ProductId
