@@ -29,6 +29,13 @@ library utils
                     , LocatedChar
     hs-source-dirs:   utils
 
+executable day03
+    import:           common
+    main-is:          Main.hs
+    other-modules:    BatteryBank
+    build-depends:    utils
+    hs-source-dirs:   day03
+
 executable day02
     import:           common
     main-is:          Main.hs
