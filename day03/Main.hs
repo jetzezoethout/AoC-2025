@@ -8,4 +8,5 @@ main :: IO ()
 main =
   processFile $ \text -> do
     let batteryBanks = map parseBatteryBank $ T.lines text
-    print $ sum $ map maxJoltage batteryBanks
+    print $ sum $ map (maxJoltage 2) batteryBanks
+    print $ sum $ map (maxJoltage 12) batteryBanks
