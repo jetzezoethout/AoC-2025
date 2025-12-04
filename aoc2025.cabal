@@ -29,6 +29,13 @@ library utils
                     , LocatedChar
     hs-source-dirs:   utils
 
+executable day04
+    import:           common
+    main-is:          Main.hs
+    other-modules:    PaperRollMap
+    build-depends:    utils
+    hs-source-dirs:   day04
+
 executable day03
     import:           common
     main-is:          Main.hs
