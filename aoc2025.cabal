@@ -29,6 +29,13 @@ library utils
                     , LocatedChar
     hs-source-dirs:   utils
 
+executable day05
+    import:           common
+    main-is:          Main.hs
+    other-modules:    IngredientRange
+    build-depends:    utils
+    hs-source-dirs:   day05
+
 executable day04
     import:           common
     main-is:          Main.hs
