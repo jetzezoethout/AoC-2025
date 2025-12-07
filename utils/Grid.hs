@@ -4,6 +4,7 @@ import           Coordinate  (Coordinate (..))
 import           Data.Text   (Text)
 import qualified Data.Text   as T
 import           Data.Vector (Vector, fromList, (!))
+import qualified Data.Vector as V
 
 type DefaultArray = Vector Int
 
@@ -40,3 +41,13 @@ grid `safeAtCoordinate` coordinate =
 isInside :: Coordinate -> Grid a -> Bool
 Coordinate {..} `isInside` Grid {..} =
   0 <= row && row < height && 0 <= column && column < width
+
+findInGrid :: (a -> Bool) -> Grid a -> Maybe Coordinate
+findInGrid p Grid {..} = go 0 grid
+  where
+    go rowsChecked rows =
+      if V.null rows
+        then Nothing
+        else case V.findIndex p (rows ! 0) of
+               Nothing     -> go (rowsChecked + 1) $ V.drop 1 rows
+               Just column -> Just $ Coordinate rowsChecked column
