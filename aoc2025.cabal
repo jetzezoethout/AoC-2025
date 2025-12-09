@@ -33,7 +33,9 @@ library utils
 executable day09
     import:           common
     main-is:          Main.hs
-    other-modules:    
+    other-modules:    Rectangle
+                    , Edge
+                    , Interval
     build-depends:    utils
     hs-source-dirs:   day09
 
