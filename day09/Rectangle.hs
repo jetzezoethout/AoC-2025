@@ -1,23 +1,18 @@
 module Rectangle where
 
 import           Coordinate (Coordinate (..))
+import           Interval   (Interval, makeInterval)
 
 data Rectangle = Rectangle
   { topLeft     :: Coordinate
   , bottomRight :: Coordinate
   } deriving (Show)
 
-top :: Rectangle -> Int
-top Rectangle {..} = topLeft.row
+rows :: Rectangle -> Interval
+rows Rectangle {..} = makeInterval topLeft.row bottomRight.row
 
-bottom :: Rectangle -> Int
-bottom Rectangle {..} = bottomRight.row
-
-left :: Rectangle -> Int
-left Rectangle {..} = topLeft.column
-
-right :: Rectangle -> Int
-right Rectangle {..} = bottomRight.column
+columns :: Rectangle -> Interval
+columns Rectangle {..} = makeInterval topLeft.column bottomRight.column
 
 makeRectangle :: Coordinate -> Coordinate -> Rectangle
 makeRectangle vertex1 vertex2 =

@@ -1,8 +1,9 @@
 module Edge where
 
 import           Coordinate (Coordinate (..))
-import           Interval   (Interval, collide, makeInterval, overlap)
-import           Rectangle  (Rectangle (..), bottom, left, right, top)
+import           Interval   (Interval, makeInterval, overlapStrictly,
+                             strictlyInside)
+import           Rectangle  (Rectangle (..), columns, rows)
 
 data HorizontalEdge = HorizontalEdge
   { inRow          :: Int
@@ -26,18 +27,12 @@ makeEdges :: [Coordinate] -> [Edge]
 makeEdges coords = zipWith makeEdge coords $ tail $ cycle coords
 
 eliminatesHorizontal :: Rectangle -> HorizontalEdge -> Bool
-eliminatesHorizontal rect HorizontalEdge {..}
-  | inRow == top rect = collide columnInterval $ makeInterval (left rect) (right rect)
-  | top rect < inRow && inRow < bottom rect = overlap columnInterval $ makeInterval (left rect) (right rect)
-  | inRow == bottom rect = collide columnInterval $ makeInterval (right rect) (left rect)
-  | otherwise = False
+eliminatesHorizontal rect HorizontalEdge {..} =
+  inRow `strictlyInside` rows rect && overlapStrictly columnInterval (columns rect)
 
 eliminatesVertical :: Rectangle -> VerticalEdge -> Bool
-eliminatesVertical rect VerticalEdge {..}
-  | inColumn == left rect = collide rowInterval $ makeInterval (bottom rect) (top rect)
-  | left rect < inColumn && inColumn < right rect = overlap rowInterval $ makeInterval (top rect) (bottom rect)
-  | inColumn == right rect = collide rowInterval $ makeInterval (top rect) (bottom rect)
-  | otherwise = False
+eliminatesVertical rect VerticalEdge {..} =
+  inColumn `strictlyInside` columns rect && overlapStrictly rowInterval (rows rect)
 
 eliminates :: Rectangle -> Edge -> Bool
 eliminates rect (Left horEdge)  = eliminatesHorizontal rect horEdge
