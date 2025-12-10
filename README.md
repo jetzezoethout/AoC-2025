@@ -1,5 +1,15 @@
 # Advent of Code Haskell template
 
+## Requirements
+
+The solution to day 10, part 2, requires Z3 to be installed:
+
+```bash
+sudo apt install z3
+```
+
+## Workflow
+
 ### When starting a new year
 
 * Create a new repo from this template and clone it.

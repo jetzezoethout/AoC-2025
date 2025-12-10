@@ -35,7 +35,9 @@ executable day10
     main-is:          Main.hs
     other-modules:    Lights
                     , Machine
+                    , Machine2
     build-depends:    utils
+                    , sbv
     hs-source-dirs:   day10
 
 executable day09
