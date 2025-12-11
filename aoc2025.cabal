@@ -30,6 +30,13 @@ library utils
                     , Cached
     hs-source-dirs:   utils
 
+executable day11
+    import:           common
+    main-is:          Main.hs
+    other-modules:    Graph
+    build-depends:    utils
+    hs-source-dirs:   day11
+
 executable day10
     import:           common
     main-is:          Main.hs
