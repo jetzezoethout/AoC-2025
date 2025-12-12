@@ -30,6 +30,13 @@ library utils
                     , Cached
     hs-source-dirs:   utils
 
+executable day12
+    import:           common
+    main-is:          Main.hs
+    other-modules:    Puzzle
+    build-depends:    utils
+    hs-source-dirs:   day12
+
 executable day11
     import:           common
     main-is:          Main.hs
