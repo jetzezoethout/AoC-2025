@@ -1,6 +1,6 @@
 module Main where
 
-import           Components   (componentSizes, connectEdges, disconnected,
+import           Components   (componentSizes, connectEdges, discrete,
                                findFinalEdge)
 import           Coordinate3D (parseCoordinate3D)
 import           Data.List    (sort, sortBy)
@@ -12,7 +12,7 @@ main :: IO ()
 main =
   processFile $ \text -> do
     let coordinates = map parseCoordinate3D $ T.lines text
-        start = disconnected coordinates
+        start = discrete coordinates
         sortedEdges = sort $ generateEdges coordinates
     print $ product $ take 3 $ sortDesc $ componentSizes $ connectEdges start $ take 1000 sortedEdges
     print $ wallScore $ findFinalEdge start sortedEdges
