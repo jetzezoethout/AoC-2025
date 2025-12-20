@@ -49,9 +49,8 @@ executable day10
     main-is:          Main.hs
     other-modules:    Machine
                     , Indicator
-                    , Joltages
+                    , Vector
     build-depends:    utils
-                    , sbv
     hs-source-dirs:   day10
 
 executable day09
