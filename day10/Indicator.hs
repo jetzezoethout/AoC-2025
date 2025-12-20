@@ -29,8 +29,8 @@ initialPresses = ButtonPresses {buttonsPressed = 0, lights = fromLightsOn blacko
 press :: ButtonPresses -> ButtonBitmask -> ButtonPresses
 press ButtonPresses {..} button = ButtonPresses {buttonsPressed = buttonsPressed + 1, lights = lights `push` button}
 
-configure :: Machine -> Int
-configure Machine {..} = go S.empty $ Seq.singleton initialPresses
+configureIndicators :: Machine -> Int
+configureIndicators Machine {..} = go S.empty $ Seq.singleton initialPresses
   where
     go :: IntSet -> Seq ButtonPresses -> Int
     go seen queue =

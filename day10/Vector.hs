@@ -1,10 +1,7 @@
 module Vector where
 
-import           Control.Monad    (guard)
-import           Data.Foldable    (Foldable (foldl'))
-import           Data.Ratio       (denominator, numerator, (%))
-import           Data.Traversable (for)
-import           Machine          (Machine (..), isOnAt)
+import           Data.Foldable (Foldable (foldl'))
+import           Data.Ratio    ((%))
 
 newtype Scalar =
   Scalar Rational
@@ -153,40 +150,3 @@ pick p (x:xs) =
     else do
       (needle, rest) <- pick p xs
       return (needle, x : rest)
-
-makeSystem :: Machine -> System
-makeSystem Machine {..} = map makeEq [0 .. length joltageRequirement - 1]
-  where
-    dim = length buttons
-    makeEq i =
-      let coefficients :: [Int] =
-            [ if (buttons !! j) `isOnAt` i
-              then 1
-              else 0
-            | j <- [0 .. dim - 1]
-            ]
-       in Affine
-            (foldr (^+) (zero dim) $ zipWith (^*) (map toScalar coefficients) [unit dim j | j <- [0 .. dim - 1]])
-            (toScalar $ joltageRequirement !! i)
-
-isButtonPresses :: Scalar -> Bool
-isButtonPresses (Scalar l) = l >= 0 && numerator l `mod` denominator l == 0
-
-isValid :: Solution -> RowVector -> Bool
-isValid expressions values = all (isButtonPresses . evaluate values) expressions
-
-configureJoltages :: Machine -> Integer
-configureJoltages machine = minimum $ map (toInt . (`evaluate` sumAll solution)) validValues
-  where
-    solution = solve system
-    maxValue = maximum $ joltageRequirement machine
-    freedoms = dimension $ linear $ head solution
-    validValues = do
-      values <- RowVector <$> for [0 .. freedoms - 1] (const $ map toScalar [0 .. maxValue])
-      guard $ isValid solution values
-      return values
-    system = makeSystem machine
-    toInt (Scalar l) = numerator l `div` denominator l
-
-complexity :: Machine -> Int
-complexity machine = dimension $ linear $ head $ solve $ makeSystem machine
