@@ -47,9 +47,9 @@ executable day11
 executable day10
     import:           common
     main-is:          Main.hs
-    other-modules:    Lights
-                    , Machine
-                    , Machine2
+    other-modules:    Machine
+                    , Indicator
+                    , Joltages
     build-depends:    utils
                     , sbv
     hs-source-dirs:   day10
