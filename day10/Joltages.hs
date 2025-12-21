@@ -1,10 +1,14 @@
 module Joltages where
 
+import           Data.List         (foldl')
 import           Data.Maybe        (fromJust)
 import           Data.Ratio        (denominator, numerator)
+import           Data.Traversable  (for)
+import           LinAlg.Constraint (collectLowers, collectUppers, constrain)
 import           LinAlg.Equation   (Equation (..), System, system)
-import           LinAlg.Expression (evaluate)
-import           LinAlg.RowVector  (RowVector (..), unit)
+import           LinAlg.Expression (Expression (..), commonDenominator,
+                                    evaluate)
+import           LinAlg.RowVector  (RowVector (..), embedAt, leading, unit)
 import           LinAlg.Solve      (Solution, nullDimension, solve)
 import           LinAlg.Vector     (Scalar (..), sumVecs, toScalar, (^*))
 import           Machine           (Machine (..), isOnAt)
@@ -28,40 +32,45 @@ makeSystem Machine {..} = system numVars $ map makeEq [0 .. length joltageRequir
 isButtonPresses :: Scalar -> Bool
 isButtonPresses (Scalar l) = l >= 0 && numerator l `mod` denominator l == 0
 
-isValid :: Solution -> RowVector -> Bool
-isValid expressions values = all (isButtonPresses . (`evaluate` values)) expressions
+isValidFor :: Solution -> RowVector -> Bool
+isValidFor solution values = all (isButtonPresses . (`evaluate` values)) solution
 
-combinations :: Int -> Int -> [[Int]]
-combinations 0 0 = [[]]
-combinations 0 _ = []
-combinations vars total = [x : xs | x <- [0 .. total], xs <- combinations (vars - 1) (total - x)]
+roundDown :: Scalar -> Scalar
+roundDown (Scalar l) = toScalar $ numerator l `div` denominator l
 
-data IntTop
-  = Finite Int
-  | Infinity
-  deriving (Eq, Ord)
+roundUp :: Scalar -> Scalar
+roundUp (Scalar l) = toScalar $ numerator l `ceilDiv` denominator l
+  where
+    x `ceilDiv` y = -((-x) `div` y)
 
-safeMinimum :: [IntTop] -> IntTop
-safeMinimum = foldr min Infinity
-
-asInt :: IntTop -> Int
-asInt (Finite n) = n
-asInt Infinity   = error "infinity is not a number"
+toInt :: Scalar -> Int
+toInt (Scalar l) =
+  if numerator l `mod` denominator l == 0
+    then fromInteger $ numerator l `div` denominator l
+    else error "Non-integral scalar"
 
 configureJoltages :: Machine -> Int
-configureJoltages machine = go Infinity 0
+configureJoltages machine =
+  toInt
+    $ if freedoms == 0
+        then constant sumExpression
+        else minimum $ map (evaluate sumExpression) $ filter (isValidFor solution) criticalPoints
   where
     solution = fromJust $ solve $ makeSystem machine
     freedoms = nullDimension solution
-    toInt (Scalar l) = fromIntegral $ numerator l `div` denominator l
-    go :: IntTop -> Int -> Int
-    go minSoFar currentTotal
-      | minSoFar <= Finite currentTotal = asInt minSoFar
-      | otherwise =
-        let minForCurrentTotal =
-              safeMinimum
-                $ map (Finite . toInt . evaluate (sumVecs solution))
-                $ filter (isValid solution)
-                $ map (RowVector . map toScalar)
-                $ combinations freedoms currentTotal
-         in go (min minSoFar minForCurrentTotal) (currentTotal + 1)
+    maxJoltage = maximum $ joltageRequirement machine
+    sumExpression = sumVecs solution
+    constraints = map constrain solution
+    lowerBounds = collectLowers constraints
+    upperBounds = collectUppers constraints
+    criticalWidth = foldl' lcm 1 $ map commonDenominator solution
+    getCriticalValues fixedParams =
+      if leading (paramCoefficients sumExpression) >= 0
+        then let edgeValue = roundUp $ maximum $ fmap (`evaluate` fixedParams) lowerBounds
+              in map ((edgeValue +) . toScalar) [0 .. criticalWidth - 1]
+        else let edgeValue = roundDown $ minimum $ fmap (`evaluate` fixedParams) upperBounds
+              in map ((edgeValue -) . toScalar) [0 .. criticalWidth - 1]
+    criticalPoints = do
+      fixedParams <- RowVector <$> for [0 .. freedoms - 2] (const $ map toScalar [0 .. maxJoltage])
+      criticalValue <- getCriticalValues fixedParams
+      return $ embedAt criticalValue fixedParams

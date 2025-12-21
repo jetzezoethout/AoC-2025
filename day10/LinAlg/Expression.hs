@@ -2,11 +2,13 @@
 
 module LinAlg.Expression where
 
+import           Data.List        (foldl')
+import           Data.Ratio       (denominator)
 import           GHC.Generics     (Generic)
 import           LinAlg.Generics  (VectorProduct (..))
-import           LinAlg.RowVector (RowVector, dimension, dotProduct, embed,
-                                   unit, zero)
-import           LinAlg.Vector    (Scalar, Vector)
+import           LinAlg.RowVector (RowVector (components), dimension,
+                                   dotProduct, embed, unit, zero)
+import           LinAlg.Vector    (Scalar (..), Vector)
 
 -- | An affine linear expression depending on a number of parameters.
 --  `Expression`s can be added and multiplied by a `Scalar`, so they are `Vector`s.
@@ -15,7 +17,7 @@ data Expression = Expression
     -- ^ The coefficients of the parameters in the expression.
   , constant          :: Scalar
     -- ^ The constant part of the expression.
-  } deriving stock (Eq, Generic)
+  } deriving stock (Eq, Show, Generic)
     deriving (Vector) via (VectorProduct Expression)
 
 -- | Introduce a new (unused) parameter x0, shifting all existing parameters one place to the right.
@@ -33,3 +35,8 @@ evaluate Expression {..} values =
   if dimension values /= dimension paramCoefficients
     then error "Number of values does not match the number of parameters"
     else dotProduct values paramCoefficients + constant
+
+commonDenominator :: Expression -> Int
+commonDenominator Expression {..} = fromInteger $ foldl' lcm (denom constant) $ map denom $ components paramCoefficients
+  where
+    denom (Scalar l) = denominator l

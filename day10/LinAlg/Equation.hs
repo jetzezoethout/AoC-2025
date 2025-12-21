@@ -13,7 +13,7 @@ data Equation = Equation
     -- ^ The coefficients of the unknowns on the left-hand side of the equation.
   , rhs            :: Scalar
     -- ^ The scalar on the right-hand side of the equation.
-  } deriving stock (Eq, Generic)
+  } deriving stock (Eq, Show, Generic)
     deriving (Vector) via VectorProduct Equation
 
 dropFirst :: Equation -> Equation

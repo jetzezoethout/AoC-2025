@@ -33,8 +33,11 @@ leading RowVector {..} = head components
 project :: RowVector -> RowVector
 project RowVector {..} = RowVector $ tail components
 
+embedAt :: Scalar -> RowVector -> RowVector
+embedAt l RowVector {..} = RowVector $ l : components
+
 embed :: RowVector -> RowVector
-embed RowVector {..} = RowVector $ 0 : components
+embed = embedAt 0
 
 dotProduct :: RowVector -> RowVector -> Scalar
 dotProduct (RowVector xs) (RowVector ys) = sum $ zipWith (*) xs ys

@@ -6,7 +6,7 @@ import           Data.Ratio ((%))
 
 newtype Scalar =
   Scalar Rational
-  deriving newtype (Eq, Num, Fractional)
+  deriving newtype (Eq, Ord, Num, Fractional)
   deriving stock (Show)
 
 toScalar :: Integral a => a -> Scalar
