@@ -50,7 +50,12 @@ executable day10
     other-modules:    Machine
                     , Indicator
                     , Joltages
-                    , Vector
+                    , LinAlg.Vector
+                    , LinAlg.Generics
+                    , LinAlg.RowVector
+                    , LinAlg.Equation
+                    , LinAlg.Expression
+                    , LinAlg.Solve
     build-depends:    utils
     hs-source-dirs:   day10
 

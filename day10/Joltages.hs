@@ -1,31 +1,35 @@
 module Joltages where
 
-import           Data.Ratio (denominator, numerator)
-import           Machine    (Machine (..), isOnAt)
-import           Vector     (Affine (..), RowVector (..), Scalar (..),
-                             Scalarable (..), Solution, System, dimension,
-                             evaluate, solve, sumAll, unit, zero, (^*), (^+))
+import           Data.Maybe        (fromJust)
+import           Data.Ratio        (denominator, numerator)
+import           LinAlg.Equation   (Equation (..), System, system)
+import           LinAlg.Expression (evaluate)
+import           LinAlg.RowVector  (RowVector (..), unit)
+import           LinAlg.Solve      (Solution, nullDimension, solve)
+import           LinAlg.Vector     (Scalar (..), sumVecs, toScalar, (^*))
+import           Machine           (Machine (..), isOnAt)
 
 makeSystem :: Machine -> System
-makeSystem Machine {..} = map makeEq [0 .. length joltageRequirement - 1]
+makeSystem Machine {..} = system numVars $ map makeEq [0 .. length joltageRequirement - 1]
   where
-    dim = length buttons
+    numVars = length buttons
     makeEq i =
-      let coefficients :: [Int] =
+      let coefficients =
             [ if (buttons !! j) `isOnAt` i
               then 1
               else 0
-            | j <- [0 .. dim - 1]
+            | j <- [0 .. numVars - 1]
             ]
-       in Affine
-            (foldr (^+) (zero dim) $ zipWith (^*) (map toScalar coefficients) [unit dim j | j <- [0 .. dim - 1]])
-            (toScalar $ joltageRequirement !! i)
+       in Equation
+            { eqCoefficients = sumVecs $ zipWith (^*) coefficients [unit numVars j | j <- [0 .. numVars - 1]]
+            , rhs = toScalar $ joltageRequirement !! i
+            }
 
 isButtonPresses :: Scalar -> Bool
 isButtonPresses (Scalar l) = l >= 0 && numerator l `mod` denominator l == 0
 
 isValid :: Solution -> RowVector -> Bool
-isValid expressions values = all (isButtonPresses . evaluate values) expressions
+isValid expressions values = all (isButtonPresses . (`evaluate` values)) expressions
 
 combinations :: Int -> Int -> [[Int]]
 combinations 0 0 = [[]]
@@ -47,8 +51,8 @@ asInt Infinity   = error "infinity is not a number"
 configureJoltages :: Machine -> Int
 configureJoltages machine = go Infinity 0
   where
-    solution = solve $ makeSystem machine
-    freedoms = dimension $ linear $ head solution
+    solution = fromJust $ solve $ makeSystem machine
+    freedoms = nullDimension solution
     toInt (Scalar l) = fromIntegral $ numerator l `div` denominator l
     go :: IntTop -> Int -> Int
     go minSoFar currentTotal
@@ -56,7 +60,7 @@ configureJoltages machine = go Infinity 0
       | otherwise =
         let minForCurrentTotal =
               safeMinimum
-                $ map (Finite . toInt . (`evaluate` sumAll solution))
+                $ map (Finite . toInt . evaluate (sumVecs solution))
                 $ filter (isValid solution)
                 $ map (RowVector . map toScalar)
                 $ combinations freedoms currentTotal
