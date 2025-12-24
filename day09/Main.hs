@@ -5,8 +5,8 @@ import           Data.Function (on)
 import           Data.List     (sortBy)
 import           Data.Text     (Text)
 import qualified Data.Text     as T
-import           Edge          (isInside, makeEdges)
 import           Parsers       (parseInt)
+import           Polygon       (boundary, draw, intersects)
 import           ProcessFile   (processFile)
 import           Rectangle     (area, makeRectangles)
 
@@ -15,9 +15,10 @@ main =
   processFile $ \text -> do
     let redTiles = map parseRedTile $ T.lines text
         sortedRectangles = sortBy (flip compare `on` area) $ makeRectangles redTiles
-        edges = makeEdges redTiles
+        polygon = draw redTiles
+        boundaryPolygon = boundary polygon
     print $ area $ head sortedRectangles
-    print $ area $ head $ filter (isInside edges) sortedRectangles
+    print $ area $ head $ filter (not . intersects boundaryPolygon) sortedRectangles
 
 parseRedTile :: Text -> Coordinate
 parseRedTile text =

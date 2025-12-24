@@ -64,8 +64,8 @@ executable day09
     import:           common
     main-is:          Main.hs
     other-modules:    Rectangle
-                    , Edge
                     , Interval
+                    , Polygon
     build-depends:    utils
     hs-source-dirs:   day09
 

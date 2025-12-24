@@ -1,15 +1,18 @@
 module Interval where
 
 data Interval = Interval
-  { low  :: Int
-  , high :: Int
+  { start :: Int
+  , end   :: Int
   } deriving (Show)
 
-makeInterval :: Int -> Int -> Interval
-makeInterval start end = Interval {low = min start end, high = max start end}
+low :: Interval -> Int
+low Interval {..} = min start end
 
-overlapStrictly :: Interval -> Interval -> Bool
-overlapStrictly i1 i2 = max i1.low i2.low < min i1.high i2.high
+high :: Interval -> Int
+high Interval {..} = max start end
 
-strictlyInside :: Int -> Interval -> Bool
-strictlyInside x Interval {..} = low < x && x < high
+overlap :: Interval -> Interval -> Bool
+overlap i1 i2 = max (low i1) (low i2) <= min (high i1) (high i2)
+
+inside :: Int -> Interval -> Bool
+inside x i = low i <= x && x <= high i
